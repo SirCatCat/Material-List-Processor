@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minecraft Material Calculator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-6">
+  <div class="max-w-5xl mx-auto space-y-6">
+    <h1 class="text-3xl font-bold">Minecraft Material Calculator</h1>
+
+    <div id="sessionControls" class="space-y-2"></div>
+
+    <!-- Search / Filter / Export -->
+    <div class="flex flex-wrap gap-4 items-center">
+      <input type="text" id="searchInput" class="border p-2 rounded flex-1" placeholder="Search materials..." />
+      <select id="filterSelect" class="border p-2 rounded">
+        <option value="all">All</option>
+        <option value="missing">Missing only</option>
+        <option value="done">Completed only</option>
+      </select>
+      <button id="exportCSV" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors">Export CSV</button>
+      <button id="exportJSON" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors">Export JSON</button>
+    </div>
+
+    <!-- Progress bar -->
+    <div>
+      <p class="text-sm text-gray-600">Progress</p>
+      <div class="w-full bg-gray-300 rounded h-4">
+        <div id="progressBar" class="bg-green-500 h-4 rounded transition-all duration-300" style="width:0%"></div>
+      </div>
+      <p id="progressText" class="text-sm text-gray-700 mt-1"></p>
+    </div>
+
+    <!-- Totals -->
+    <div id="totals" class="p-4 bg-white rounded-xl shadow text-sm grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+
+    <!-- Import -->
+    <div class="flex flex-col md:flex-row gap-4 items-start">
+      <div class="w-full md:w-1/3">
+        <label for="fileUpload" class="block text-sm font-medium text-gray-700 mb-1">Import CSV File</label>
+        <input type="file" id="fileUpload" class="border p-2 rounded w-full" accept=".csv" />
+      </div>
+      <div class="w-full md:w-2/3">
+        <label for="pasteInput" class="block text-sm font-medium text-gray-700 mb-1">Or Paste CSV Data</label>
+        <textarea id="pasteInput" class="border p-2 rounded w-full h-32" placeholder="Paste your material list here..."></textarea>
+      </div>
+    </div>
+
+    <!-- Material list -->
+    <div id="materialList" class="grid gap-4"></div>
+  </div>
+
+  <script>
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+    };
+    
+    // App State
+    const state = {
+      sessionId: null,
+      materials: [],
+      owner: false,
+      firebaseInitialized: false
+    };
+
+    // Initialize Firebase
+    function initializeFirebase() {
+      if (!firebaseConfig.apiKey || firebaseConfig.apiKey === "YOUR_API_KEY") {
+        console.warn("Firebase is not configured. Please add your Firebase configuration.");
+        return false;
+      }
+      
+      try {
+        firebase.initializeApp(firebaseConfig);
+        state.firebaseInitialized = true;
+        return true;
+      } catch (error) {
+        console.error("Error initializing Firebase:", error);
+        return false;
+      }
+    }
+
+    // Utility Functions
+    const utils = {
+      calcWoolForCarpet: (amount) => Math.ceil(amount / 3) * 2,
+      
+      formatStacksAndShulkers: (amount) => {
+        const stacks = Math.floor(amount / 64);
+        const leftover = amount % 64;
+        const shulkers = Math.floor(stacks / 27);
+        const stacksInLastShulker = stacks % 27;
+        return `${amount} total → ${shulkers} Shulker(s), ${stacksInLastShulker} Stack(s), ${leftover} Item(s)`;
+      },
+      
+      generateSessionId: () => Math.random().toString(36).substring(2, 10),
+      
+      debounce: (func, delay) => {
+        let timeoutId;
+        return (...args) => {
+          clearTimeout(timeoutId);
+          timeoutId = setTimeout(() => func.apply(null, args), delay);
+        };
+      }
+    };
+
+    // Progress Calculation
+    function calculateProgress() {
+      const total = state.materials.reduce((sum, m) => sum + m.total, 0);
+      const available = state.materials.reduce((sum, m) => sum + m.available, 0);
+      const percent = total ? Math.round((available / total) * 100) : 0;
+      
+      document.getElementById("progressBar").style.width = percent + "%";
+      document.getElementById("progressText").textContent = 
+        `${available}/${total} items (${percent}%) collected.`;
+    }
+
+    // Render Totals
+    function renderTotals() {
+      const totalItems = state.materials.reduce((sum, m) => sum + m.total, 0);
+      const totalMissing = state.materials.reduce((sum, m) => sum + m.missing, 0);
+      const totalAvailable = state.materials.reduce((sum, m) => sum + m.available, 0);
+      
+      document.getElementById("totals").innerHTML = `
+        <div class="text-center p-2 bg-blue-50 rounded-lg">
+          <p class="font-semibold">Total Items</p>
+          <p class="text-2xl">${totalItems}</p>
+        </div>
+        <div class="text-center p-2 bg-green-50 rounded-lg">
+          <p class="font-semibold">Available</p>
+          <p class="text-2xl">${totalAvailable}</p>
+        </div>
+        <div class="text-center p-2 bg-red-50 rounded-lg">
+          <p class="font-semibold">Missing</p>
+          <p class="text-2xl">${totalMissing}</p>
+        </div>
+      `;
+    }
+
+    // Material List Rendering
+    function renderMaterials() {
+      const container = document.getElementById("materialList");
+      container.innerHTML = "";
+
+      const search = document.getElementById("searchInput").value.toLowerCase();
+      const filter = document.getElementById("filterSelect").value;
+
+      // Filter materials based on search and filter criteria
+      const filteredMaterials = state.materials.filter(mat => {
+        if (search && !mat.item.toLowerCase().includes(search)) return false;
+        if (filter === "missing" && mat.missing <= 0) return false;
+        if (filter === "done" && mat.missing > 0) return false;
+        return true;
+      });
+
+      // Render each material card
+      filteredMaterials.forEach((mat, i) => {
+        const originalIndex = state.materials.findIndex(m => m.item === mat.item);
+        if (originalIndex === -1) return;
+
+        const stackInfo = utils.formatStacksAndShulkers(mat.total);
+        const isCarpet = mat.item.toLowerCase().includes("carpet");
+        const woolInfo = isCarpet ? utils.formatStacksAndShulkers(utils.calcWoolForCarpet(mat.total)) : null;
+
+        const card = document.createElement("div");
+        card.className = `p-4 rounded-xl shadow bg-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4 ${mat.checked ? 'opacity-50' : ''}`;
+
+        card.innerHTML = `
+          <div class="flex-1">
+            <p class="font-semibold text-lg">${mat.item}</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2 text-sm">
+              <p class="text-gray-700"><span class="font-medium">Total:</span> ${mat.total}</p>
+              <p class="text-gray-700"><span class="font-medium">Stacks/Shulker:</span> ${stackInfo}</p>
+              <p class="text-gray-700">
+                <span class="font-medium">Available:</span> 
+                <input type="number" min="0" class="border rounded p-1 w-20 ml-1" 
+                       value="${mat.available}" 
+                       onchange="updateMaterialValue(${originalIndex}, 'available', this.value)"
+                       ${state.owner ? '' : 'disabled'}>
+              </p>
+              <p class="text-gray-700">
+                <span class="font-medium">Missing:</span> 
+                <input type="number" min="0" class="border rounded p-1 w-20 ml-1" 
+                       value="${mat.missing}" 
+                       onchange="updateMaterialValue(${originalIndex}, 'missing', this.value)"
+                       ${state.owner ? '' : 'disabled'}>
+              </p>
+            </div>
+            ${woolInfo ? `<p class="text-sm text-blue-600 mt-2"><span class="font-medium">Wool needed:</span> ${woolInfo}</p>` : ""}
+          </div>
+          <div class="flex items-center">
+            <label class="flex items-center space-x-2">
+              <span class="text-sm text-gray-700">Completed</span>
+              <input type="checkbox" ${mat.checked ? 'checked' : ''} 
+                     onchange="toggleMaterialCheck(${originalIndex})"
+                     ${state.owner ? '' : 'disabled'}
+                     class="h-5 w-5 rounded border-gray-300">
+            </label>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+
+      renderTotals();
+      calculateProgress();
+    }
+
+    // Material Operations
+    function updateMaterialValue(index, field, value) {
+      if (!state.owner) return;
+      
+      const numValue = parseInt(value, 10) || 0;
+      state.materials[index][field] = numValue;
+      
+      // Recalculate missing/available if needed
+      if (field === 'available') {
+        state.materials[index].missing = Math.max(0, state.materials[index].total - numValue);
+      } else if (field === 'missing') {
+        state.materials[index].available = Math.max(0, state.materials[index].total - numValue);
+      }
+      
+      updateSession();
+      renderMaterials();
+    }
+
+    function toggleMaterialCheck(index) {
+      if (!state.owner) return;
+      
+      state.materials[index].checked = !state.materials[index].checked;
+      updateSession();
+      renderMaterials();
+    }
+
+    // Session Management
+    function updateSession() {
+      if (!state.sessionId || !state.firebaseInitialized) {
+        // Fallback to localStorage if Firebase is not available
+        localStorage.setItem("materials", JSON.stringify(state.materials));
+        return;
+      }
+      
+      try {
+        const db = firebase.firestore();
+        db.collection("sessions").doc(state.sessionId).set({
+          materials: state.materials,
+          owner: state.owner,
+          updatedAt: new Date()
+        }).catch(error => {
+          console.error("Error updating session:", error);
+          // Fallback to localStorage
+          localStorage.setItem("materials", JSON.stringify(state.materials));
+        });
+      } catch (error) {
+        console.error("Firestore error:", error);
+        localStorage.setItem("materials", JSON.stringify(state.materials));
+      }
+    }
+
+    function createSession() {
+      state.sessionId = utils.generateSessionId();
+      state.owner = true;
+      
+      if (state.firebaseInitialized) {
+        updateSession();
+      }
+      
+      setupShareLink();
+    }
+
+    function joinSession(id) {
+      state.sessionId = id;
+      
+      if (!state.firebaseInitialized) {
+        console.warn("Firebase not initialized, cannot join session");
+        return;
+      }
+      
+      try {
+        const db = firebase.firestore();
+        db.collection("sessions").doc(state.sessionId).onSnapshot((doc) => {
+          if (doc.exists) {
+            const data = doc.data();
+            state.materials = data.materials || [];
+            state.owner = data.owner || false;
+            renderMaterials();
+          }
+        }, (error) => {
+          console.error("Error joining session:", error);
+        });
+      } catch (error) {
+        console.error("Firestore error:", error);
+      }
+      
+      setupShareLink();
+    }
+
+    function setupShareLink() {
+      const container = document.getElementById("sessionControls");
+      if (!state.sessionId) {
+        container.innerHTML = '';
+        return;
+      }
+      
+      const shareUrl = `${window.location.origin}${window.location.pathname}?session=${state.sessionId}`;
+      container.innerHTML = `
+        <div class="bg-blue-50 p-4 rounded-lg">
+          <p class="text-sm font-medium text-blue-800">Share this link with your friend:</p>
+          <div class="flex items-center mt-2">
+            <input class="border p-2 rounded-l flex-1" readonly value="${shareUrl}" id="shareLinkInput" />
+            <button class="bg-blue-500 text-white px-4 py-2 rounded-r hover:bg-blue-600 transition-colors" onclick="copyShareLink()">Copy</button>
+          </div>
+          <p class="text-xs text-blue-600 mt-2">Role: ${state.owner ? 'Owner (can edit)' : 'Viewer (read-only)'}</p>
+        </div>
+      `;
+    }
+
+    function copyShareLink() {
+      const input = document.getElementById("shareLinkInput");
+      input.select();
+      document.execCommand("copy");
+      alert("Link copied to clipboard!");
+    }
+
+    // Data Import/Export
+    function parseCSV(text) {
+      Papa.parse(text, {
+        header: true,
+        skipEmptyLines: true,
+        complete: (results) => {
+          state.materials = results.data.map((row) => ({
+            item: row.Item || row.item || '',
+            total: parseInt(row.Total || row.total, 10) || 0,
+            missing: parseInt(row.Missing || row.missing, 10) || 0,
+            available: parseInt(row.Available || row.available, 10) || 0,
+            checked: false,
+          }));
+          renderMaterials();
+          updateSession();
+        },
+        error: (error) => {
+          console.error("CSV parsing error:", error);
+          alert("Error parsing CSV. Please check the format.");
+        }
+      });
+    }
+
+    function exportCSV() {
+      const csv = Papa.unparse(state.materials);
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "minecraft-materials.csv";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function exportJSON() {
+      const dataStr = JSON.stringify(state.materials, null, 2);
+      const blob = new Blob([dataStr], { type: "application/json" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "minecraft-materials.json";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // Event Listeners
+    function setupEventListeners() {
+      document.getElementById("exportCSV").addEventListener("click", exportCSV);
+      document.getElementById("exportJSON").addEventListener("click", exportJSON);
+      
+      document.getElementById("fileUpload").addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = (evt) => parseCSV(evt.target.result);
+        reader.onerror = () => alert("Error reading file");
+        reader.readAsText(file);
+        
+        // Reset file input
+        e.target.value = '';
+      });
+      
+      document.getElementById("pasteInput").addEventListener("blur", (e) => {
+        if (e.target.value.trim()) parseCSV(e.target.value);
+      });
+      
+      const debouncedRender = utils.debounce(renderMaterials, 300);
+      document.getElementById("searchInput").addEventListener("input", debouncedRender);
+      document.getElementById("filterSelect").addEventListener("change", renderMaterials);
+    }
+
+    // Initialize App
+    function initApp() {
+      // Initialize Firebase
+      const firebaseReady = initializeFirebase();
+      
+      // Check for session ID in URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const sessionId = urlParams.get("session");
+      
+      // Load data
+      if (sessionId && firebaseReady) {
+        joinSession(sessionId);
+      } else {
+        // Try to load from localStorage
+        const savedMaterials = localStorage.getItem("materials");
+        if (savedMaterials) {
+          try {
+            state.materials = JSON.parse(savedMaterials);
+            renderMaterials();
+          } catch (e) {
+            console.error("Error parsing saved materials:", e);
+          }
+        }
+        createSession();
+      }
+      
+      // Set up event listeners
+      setupEventListeners();
+      
+      // Initial render
+      renderMaterials();
+    }
+
+    // Make functions available globally
+    window.updateMaterialValue = updateMaterialValue;
+    window.toggleMaterialCheck = toggleMaterialCheck;
+    window.copyShareLink = copyShareLink;
+
+    // Initialize the app when DOM is loaded
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initApp);
+    } else {
+      initApp();
+    }
+  </script>
+</body>
+</html>
