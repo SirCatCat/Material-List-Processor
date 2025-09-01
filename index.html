@@ -8,28 +8,43 @@
   <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-gray-100 min-h-screen p-6">
   <div class="max-w-5xl mx-auto space-y-6">
-    <h1 class="text-3xl font-bold">Minecraft Material Calculator</h1>
+    <header class="flex justify-between items-center">
+      <h1 class="text-3xl font-bold text-blue-700">
+        <i class="fas fa-cube mr-2"></i>Minecraft Material Calculator
+      </h1>
+      <button id="helpBtn" class="bg-gray-200 text-gray-700 p-2 rounded-full hover:bg-gray-300 transition-colors">
+        <i class="fas fa-question"></i>
+      </button>
+    </header>
 
     <div id="sessionControls" class="space-y-2"></div>
 
     <!-- Search / Filter / Export -->
-    <div class="flex flex-wrap gap-4 items-center">
-      <input type="text" id="searchInput" class="border p-2 rounded flex-1" placeholder="Search materials..." />
+    <div class="flex flex-wrap gap-4 items-center p-4 bg-white rounded-xl shadow">
+      <div class="relative flex-1">
+        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+        <input type="text" id="searchInput" class="border p-2 rounded pl-10 w-full" placeholder="Search materials..." />
+      </div>
       <select id="filterSelect" class="border p-2 rounded">
         <option value="all">All</option>
         <option value="missing">Missing only</option>
         <option value="done">Completed only</option>
       </select>
-      <button id="exportCSV" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors">Export CSV</button>
-      <button id="exportJSON" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors">Export JSON</button>
+      <button id="exportCSV" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors flex items-center">
+        <i class="fas fa-file-csv mr-2"></i>Export CSV
+      </button>
+      <button id="exportJSON" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors flex items-center">
+        <i class="fas fa-file-code mr-2"></i>Export JSON
+      </button>
     </div>
 
     <!-- Progress bar -->
-    <div>
-      <p class="text-sm text-gray-600">Progress</p>
+    <div class="p-4 bg-white rounded-xl shadow">
+      <p class="text-sm text-gray-600 mb-2">Progress</p>
       <div class="w-full bg-gray-300 rounded h-4">
         <div id="progressBar" class="bg-green-500 h-4 rounded transition-all duration-300" style="width:0%"></div>
       </div>
@@ -37,22 +52,46 @@
     </div>
 
     <!-- Totals -->
-    <div id="totals" class="p-4 bg-white rounded-xl shadow text-sm grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+    <div id="totals" class="p-4 bg-white rounded-xl shadow text-sm grid grid-cols-1 md:grid-cols-4 gap-4"></div>
 
     <!-- Import -->
-    <div class="flex flex-col md:flex-row gap-4 items-start">
+    <div class="flex flex-col md:flex-row gap-4 items-start p-4 bg-white rounded-xl shadow">
       <div class="w-full md:w-1/3">
-        <label for="fileUpload" class="block text-sm font-medium text-gray-700 mb-1">Import CSV File</label>
+        <label for="fileUpload" class="block text-sm font-medium text-gray-700 mb-1">
+          <i class="fas fa-upload mr-1"></i>Import CSV File
+        </label>
         <input type="file" id="fileUpload" class="border p-2 rounded w-full" accept=".csv" />
       </div>
       <div class="w-full md:w-2/3">
-        <label for="pasteInput" class="block text-sm font-medium text-gray-700 mb-1">Or Paste CSV Data</label>
+        <label for="pasteInput" class="block text-sm font-medium text-gray-700 mb-1">
+          <i class="fas fa-paste mr-1"></i>Or Paste CSV Data
+        </label>
         <textarea id="pasteInput" class="border p-2 rounded w-full h-32" placeholder="Paste your material list here..."></textarea>
       </div>
     </div>
 
     <!-- Material list -->
     <div id="materialList" class="grid gap-4"></div>
+    
+    <!-- Help Modal -->
+    <div id="helpModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+      <div class="bg-white p-6 rounded-xl shadow-lg max-w-lg w-full mx-4">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-bold">How to use</h2>
+          <button id="closeHelp" class="text-gray-500 hover:text-gray-700">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="space-y-3">
+          <p><strong>1.</strong> Import materials via CSV file or paste CSV data</p>
+          <p><strong>2.</strong> Use the checkboxes to mark materials as completed</p>
+          <p><strong>3.</strong> When you mark a material as completed, the available amount will automatically be set to the total needed</p>
+          <p><strong>4.</strong> You can manually adjust available/missing amounts if needed</p>
+          <p><strong>5.</strong> Share the session link with others to collaborate</p>
+          <p><strong>6.</strong> Export your data as CSV or JSON when done</p>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -100,6 +139,22 @@
         return `${amount} total → ${shulkers} Shulker(s), ${stacksInLastShulker} Stack(s), ${leftover} Item(s)`;
       },
       
+      // Berechne Gesamt-Shulker für alle Materialien
+      calculateTotalShulkers: (materials) => {
+        const totalItems = materials.reduce((sum, m) => sum + m.total, 0);
+        const totalStacks = Math.floor(totalItems / 64);
+        const totalShulkers = Math.floor(totalStacks / 27);
+        return totalShulkers;
+      },
+      
+      // Berechne benötigte Shulker für fehlende Materialien
+      calculateMissingShulkers: (materials) => {
+        const missingItems = materials.reduce((sum, m) => sum + m.missing, 0);
+        const missingStacks = Math.floor(missingItems / 64);
+        const missingShulkers = Math.floor(missingStacks / 27);
+        return missingShulkers;
+      },
+      
       generateSessionId: () => Math.random().toString(36).substring(2, 10),
       
       debounce: (func, delay) => {
@@ -127,6 +182,8 @@
       const totalItems = state.materials.reduce((sum, m) => sum + m.total, 0);
       const totalMissing = state.materials.reduce((sum, m) => sum + m.missing, 0);
       const totalAvailable = state.materials.reduce((sum, m) => sum + m.available, 0);
+      const totalShulkers = utils.calculateTotalShulkers(state.materials);
+      const missingShulkers = utils.calculateMissingShulkers(state.materials);
       
       document.getElementById("totals").innerHTML = `
         <div class="text-center p-2 bg-blue-50 rounded-lg">
@@ -140,6 +197,11 @@
         <div class="text-center p-2 bg-red-50 rounded-lg">
           <p class="font-semibold">Missing</p>
           <p class="text-2xl">${totalMissing}</p>
+        </div>
+        <div class="text-center p-2 bg-purple-50 rounded-lg">
+          <p class="font-semibold">Shulkers Needed</p>
+          <p class="text-2xl">${missingShulkers}/${totalShulkers}</p>
+          <p class="text-xs text-gray-600 mt-1">Missing/Total</p>
         </div>
       `;
     }
@@ -170,11 +232,14 @@
         const woolInfo = isCarpet ? utils.formatStacksAndShulkers(utils.calcWoolForCarpet(mat.total)) : null;
 
         const card = document.createElement("div");
-        card.className = `p-4 rounded-xl shadow bg-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4 ${mat.checked ? 'opacity-50' : ''}`;
+        card.className = `p-4 rounded-xl shadow bg-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4 ${mat.checked ? 'border-2 border-green-500' : ''}`;
 
         card.innerHTML = `
           <div class="flex-1">
-            <p class="font-semibold text-lg">${mat.item}</p>
+            <div class="flex items-center mb-2">
+              <p class="font-semibold text-lg">${mat.item}</p>
+              ${mat.checked ? '<span class="ml-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">Completed</span>' : ''}
+            </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2 text-sm">
               <p class="text-gray-700"><span class="font-medium">Total:</span> ${mat.total}</p>
               <p class="text-gray-700"><span class="font-medium">Stacks/Shulker:</span> ${stackInfo}</p>
@@ -196,12 +261,16 @@
             ${woolInfo ? `<p class="text-sm text-blue-600 mt-2"><span class="font-medium">Wool needed:</span> ${woolInfo}</p>` : ""}
           </div>
           <div class="flex items-center">
-            <label class="flex items-center space-x-2">
-              <span class="text-sm text-gray-700">Completed</span>
-              <input type="checkbox" ${mat.checked ? 'checked' : ''} 
-                     onchange="toggleMaterialCheck(${originalIndex})"
-                     ${state.owner ? '' : 'disabled'}
-                     class="h-5 w-5 rounded border-gray-300">
+            <label class="flex items-center space-x-2 cursor-pointer">
+              <span class="text-sm text-gray-700">Mark as completed</span>
+              <div class="relative">
+                <input type="checkbox" ${mat.checked ? 'checked' : ''} 
+                       onchange="toggleMaterialCheck(${originalIndex})"
+                       ${state.owner ? '' : 'disabled'}
+                       class="sr-only">
+                <div class="block ${mat.checked ? 'bg-green-500' : 'bg-gray-300'} w-14 h-7 rounded-full transition-colors"></div>
+                <div class="dot absolute left-1 top-1 bg-white w-5 h-5 rounded-full transition ${mat.checked ? 'transform translate-x-7' : ''}"></div>
+              </div>
             </label>
           </div>
         `;
@@ -227,6 +296,9 @@
         state.materials[index].available = Math.max(0, state.materials[index].total - numValue);
       }
       
+      // Update checked status based on availability
+      state.materials[index].checked = state.materials[index].available >= state.materials[index].total;
+      
       updateSession();
       renderMaterials();
     }
@@ -234,7 +306,19 @@
     function toggleMaterialCheck(index) {
       if (!state.owner) return;
       
-      state.materials[index].checked = !state.materials[index].checked;
+      const isChecked = !state.materials[index].checked;
+      state.materials[index].checked = isChecked;
+      
+      // If marking as completed, set available to total
+      if (isChecked) {
+        state.materials[index].available = state.materials[index].total;
+        state.materials[index].missing = 0;
+      } else {
+        // If unchecking, reset available to 0
+        state.materials[index].available = 0;
+        state.materials[index].missing = state.materials[index].total;
+      }
+      
       updateSession();
       renderMaterials();
     }
@@ -326,7 +410,16 @@
       const input = document.getElementById("shareLinkInput");
       input.select();
       document.execCommand("copy");
-      alert("Link copied to clipboard!");
+      
+      // Show feedback
+      const button = input.nextElementSibling;
+      const originalText = button.textContent;
+      button.textContent = "Copied!";
+      button.classList.add("bg-green-500");
+      setTimeout(() => {
+        button.textContent = originalText;
+        button.classList.remove("bg-green-500");
+      }, 2000);
     }
 
     // Data Import/Export
@@ -399,6 +492,22 @@
       const debouncedRender = utils.debounce(renderMaterials, 300);
       document.getElementById("searchInput").addEventListener("input", debouncedRender);
       document.getElementById("filterSelect").addEventListener("change", renderMaterials);
+      
+      // Help modal
+      document.getElementById("helpBtn").addEventListener("click", () => {
+        document.getElementById("helpModal").classList.remove("hidden");
+      });
+      
+      document.getElementById("closeHelp").addEventListener("click", () => {
+        document.getElementById("helpModal").classList.add("hidden");
+      });
+      
+      // Close modal when clicking outside
+      document.getElementById("helpModal").addEventListener("click", (e) => {
+        if (e.target.id === "helpModal") {
+          document.getElementById("helpModal").classList.add("hidden");
+        }
+      });
     }
 
     // Initialize App
