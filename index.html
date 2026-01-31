@@ -6,25 +6,79 @@
     <title>Litematica Material Calculator</title>
     <style>
         :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #2196F3;
+            --accent-color: #FF9800;
+            --danger-color: #f44336;
+            --warning-color: #ffc107;
+            --success-color: #4CAF50;
             --bg-color: #ffffff;
             --text-color: #333333;
             --card-bg: #f5f5f5;
             --border-color: #dddddd;
-            --primary-color: #4CAF50;
-            --secondary-color: #2196F3;
-            --danger-color: #f44336;
-            --warning-color: #ff9800;
+            --sidebar-bg: #2c3e50;
+            --sidebar-text: #ecf0f1;
         }
 
+        /* Color Scheme Templates */
         [data-theme="dark"] {
-            --bg-color: #1a1a1a;
-            --text-color: #f0f0f0;
-            --card-bg: #2d2d2d;
-            --border-color: #404040;
             --primary-color: #66bb6a;
             --secondary-color: #64b5f6;
+            --accent-color: #ffb74d;
             --danger-color: #ef5350;
-            --warning-color: #ffb74d;
+            --warning-color: #ffd54f;
+            --success-color: #66bb6a;
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --card-bg: #1e1e1e;
+            --border-color: #333333;
+            --sidebar-bg: #0d1b2a;
+            --sidebar-text: #e0e1dd;
+        }
+
+        [data-theme="blue"] {
+            --primary-color: #1976d2;
+            --secondary-color: #0288d1;
+            --accent-color: #ff5722;
+            --danger-color: #d32f2f;
+            --warning-color: #f57c00;
+            --success-color: #388e3c;
+            --bg-color: #e3f2fd;
+            --text-color: #1565c0;
+            --card-bg: #bbdefb;
+            --border-color: #90caf9;
+            --sidebar-bg: #1565c0;
+            --sidebar-text: #e3f2fd;
+        }
+
+        [data-theme="purple"] {
+            --primary-color: #7b1fa2;
+            --secondary-color: #512da8;
+            --accent-color: #ff4081;
+            --danger-color: #c2185b;
+            --warning-color: #ff9800;
+            --success-color: #388e3c;
+            --bg-color: #f3e5f5;
+            --text-color: #4a148c;
+            --card-bg: #e1bee7;
+            --border-color: #ce93d8;
+            --sidebar-bg: #4a148c;
+            --sidebar-text: #f3e5f5;
+        }
+
+        [data-theme="green"] {
+            --primary-color: #2e7d32;
+            --secondary-color: #00695c;
+            --accent-color: #ff8f00;
+            --danger-color: #c62828;
+            --warning-color: #f9a825;
+            --success-color: #1b5e20;
+            --bg-color: #e8f5e9;
+            --text-color: #1b5e20;
+            --card-bg: #c8e6c9;
+            --border-color: #a5d6a7;
+            --sidebar-bg: #1b5e20;
+            --sidebar-text: #e8f5e9;
         }
 
         * {
@@ -42,9 +96,157 @@
         }
 
         .container {
-            max-width: 1400px;
-            margin: 0 auto;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 250px;
+            background-color: var(--sidebar-bg);
+            color: var(--sidebar-text);
             padding: 20px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            transition: transform 0.3s;
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar h2 {
+            font-size: 1.2em;
+            color: var(--sidebar-text);
+        }
+
+        .close-sidebar {
+            background: none;
+            border: none;
+            color: var(--sidebar-text);
+            font-size: 1.5em;
+            cursor: pointer;
+            display: none;
+        }
+
+        .sidebar-section {
+            margin-bottom: 25px;
+        }
+
+        .sidebar-section h3 {
+            font-size: 1em;
+            margin-bottom: 10px;
+            color: rgba(255, 255, 255, 0.8);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-btn {
+            width: 100%;
+            padding: 12px 15px;
+            margin: 5px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 5px;
+            color: var(--sidebar-text);
+            text-align: left;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar-btn.active {
+            background: var(--primary-color);
+        }
+
+        .color-scheme-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .color-scheme-btn {
+            width: 100%;
+            height: 30px;
+            border: 2px solid transparent;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .color-scheme-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .color-scheme-btn.active {
+            border-color: white;
+            transform: scale(1.05);
+        }
+
+        .color-scheme-default { background: linear-gradient(135deg, #4CAF50, #2196F3); }
+        .color-scheme-dark { background: linear-gradient(135deg, #121212, #2c3e50); }
+        .color-scheme-blue { background: linear-gradient(135deg, #1976d2, #0288d1); }
+        .color-scheme-purple { background: linear-gradient(135deg, #7b1fa2, #512da8); }
+        .color-scheme-green { background: linear-gradient(135deg, #2e7d32, #00695c); }
+
+        .custom-color-input {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .custom-color-input input[type="color"] {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .custom-color-input input[type="text"] {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 20px;
+            transition: margin-left 0.3s;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.2em;
         }
 
         header {
@@ -52,8 +254,8 @@
             justify-content: space-between;
             align-items: center;
             padding: 20px 0;
-            border-bottom: 1px solid var(--border-color);
             margin-bottom: 30px;
+            border-bottom: 2px solid var(--primary-color);
             flex-wrap: wrap;
             gap: 15px;
         }
@@ -63,91 +265,28 @@
             font-size: 2.2em;
         }
 
-        .theme-toggle {
-            background: none;
-            border: 2px solid var(--border-color);
-            color: var(--text-color);
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.9em;
-            transition: all 0.3s;
-        }
-
-        .theme-toggle:hover {
-            background-color: var(--border-color);
-        }
-
-        .github-config {
-            background-color: var(--card-bg);
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border: 1px solid var(--border-color);
-        }
-
-        .github-config h3 {
-            margin-bottom: 15px;
-            color: var(--secondary-color);
-        }
-
-        .config-inputs {
+        .header-controls {
             display: flex;
-            gap: 15px;
+            gap: 10px;
             flex-wrap: wrap;
-            margin-bottom: 15px;
         }
 
-        .config-input-group {
-            flex: 1;
-            min-width: 200px;
-        }
-
-        .config-input-group label {
-            display: block;
-            margin-bottom: 5px;
+        .quick-action-btn {
+            padding: 8px 16px;
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
             font-weight: bold;
-            font-size: 0.9em;
+            transition: background-color 0.3s;
         }
 
-        .config-input-group input {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid var(--border-color);
-            border-radius: 5px;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+        .quick-action-btn:hover {
+            background-color: #0b7dda;
         }
 
-        .config-help {
-            font-size: 0.85em;
-            color: #666;
-            margin-top: 10px;
-            padding: 10px;
-            background-color: var(--bg-color);
-            border-radius: 5px;
-            border-left: 4px solid var(--secondary-color);
-        }
-
-        .github-status {
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
-            font-weight: bold;
-        }
-
-        .status-connected {
-            background-color: #d4edda;
-            border: 1px solid #c3e6cb;
-            color: #155724;
-        }
-
-        .status-disconnected {
-            background-color: #f8d7da;
-            border: 1px solid #f5c6cb;
-            color: #721c24;
-        }
-
+        /* Input Section */
         .input-section {
             background-color: var(--card-bg);
             padding: 25px;
@@ -158,7 +297,7 @@
 
         .input-options {
             display: flex;
-            gap: 20px;
+            gap: 15px;
             flex-wrap: wrap;
             margin-bottom: 20px;
         }
@@ -214,6 +353,12 @@
             border-color: var(--primary-color);
         }
 
+        .file-upload i {
+            font-size: 2em;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
         .controls {
             display: flex;
             gap: 15px;
@@ -245,6 +390,7 @@
             background-color: #0b7dda;
         }
 
+        /* Progress Section */
         .progress-section {
             background-color: var(--card-bg);
             padding: 25px;
@@ -266,6 +412,11 @@
             border-radius: 8px;
             text-align: center;
             border: 1px solid var(--border-color);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
         }
 
         .stat-value {
@@ -281,11 +432,12 @@
             border-radius: 12px;
             overflow: hidden;
             margin: 20px 0;
+            position: relative;
         }
 
         .progress-fill {
             height: 100%;
-            background-color: var(--primary-color);
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
             width: 0%;
             transition: width 0.5s ease-in-out;
             display: flex;
@@ -295,12 +447,25 @@
             font-weight: bold;
         }
 
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 0.9em;
+            color: var(--text-color);
+        }
+
+        /* Filters Section */
         .filters {
             display: flex;
             gap: 15px;
             flex-wrap: wrap;
             margin-bottom: 20px;
             align-items: center;
+            padding: 15px;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
         }
 
         select, input[type="text"] {
@@ -352,6 +517,7 @@
             color: white;
         }
 
+        /* Materials Container */
         .materials-container {
             margin: 30px 0;
         }
@@ -385,7 +551,7 @@
 
         .material-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
 
         .material-header {
@@ -398,12 +564,14 @@
         .material-name {
             font-weight: bold;
             font-size: 1.1em;
+            color: var(--primary-color);
         }
 
         .material-checkbox {
             width: 24px;
             height: 24px;
             cursor: pointer;
+            accent-color: var(--primary-color);
         }
 
         .material-stats {
@@ -429,6 +597,7 @@
             font-weight: bold;
             font-size: 1.2em;
             margin-top: 5px;
+            color: var(--text-color);
         }
 
         .input-group {
@@ -452,6 +621,11 @@
             padding: 15px;
             border-bottom: 1px solid var(--border-color);
             gap: 20px;
+            transition: background-color 0.3s;
+        }
+
+        .material-row:hover {
+            background-color: var(--card-bg);
         }
 
         .material-row .material-name {
@@ -470,7 +644,8 @@
             gap: 10px;
         }
 
-        .share-section {
+        /* Export/Import Section */
+        .data-section {
             background-color: var(--card-bg);
             padding: 25px;
             border-radius: 10px;
@@ -478,47 +653,33 @@
             border: 1px solid var(--border-color);
         }
 
-        .share-url-container {
+        .data-options {
             display: flex;
-            gap: 10px;
-            margin: 15px 0;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 15px;
         }
 
-        .share-url {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid var(--border-color);
-            border-radius: 5px;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: monospace;
-        }
-
-        .copy-btn {
+        .data-btn {
+            padding: 10px 20px;
             background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
         }
 
-        .status-indicator {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            margin-right: 8px;
+        .data-btn:hover {
+            background-color: #0b7dda;
         }
 
-        .status-connected {
-            background-color: #4CAF50;
-            animation: pulse 2s infinite;
+        .data-btn.danger {
+            background-color: var(--danger-color);
         }
 
-        .status-disconnected {
-            background-color: #f44336;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
+        .data-btn.danger:hover {
+            background-color: #d32f2f;
         }
 
         .empty-state {
@@ -527,10 +688,109 @@
             color: #666;
         }
 
-        .export-options {
+        .empty-state i {
+            font-size: 3em;
+            color: var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: var(--bg-color);
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
             display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-header h2 {
+            color: var(--primary-color);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            color: var(--text-color);
+            cursor: pointer;
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
             gap: 10px;
             margin-top: 20px;
+        }
+
+        /* Settings Modal */
+        .setting-item {
+            margin-bottom: 20px;
+        }
+
+        .setting-item label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        .setting-item input[type="range"] {
+            width: 100%;
+        }
+
+        .setting-item select {
+            width: 100%;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .close-sidebar {
+                display: block;
+            }
         }
 
         @media (max-width: 768px) {
@@ -560,707 +820,528 @@
                 width: 100%;
                 justify-content: space-between;
             }
+            
+            header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .header-controls {
+                justify-content: center;
+            }
+        }
+
+        /* Animation for new items */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .material-card, .material-row {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* Print Styles */
+        @media print {
+            .sidebar, .mobile-menu-btn, .header-controls, .filters, .data-section {
+                display: none !important;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 0;
+            }
+            
+            .material-card {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+            
+            .progress-bar {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--card-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary-color);
         }
     </style>
 </head>
 <body>
+    <button class="mobile-menu-btn" onclick="toggleSidebar()">☰ Menu</button>
+    
     <div class="container">
-        <header>
-            <h1>Litematica Material Calculator</h1>
-            <div>
-                <button class="theme-toggle" onclick="toggleTheme()">
-                    <span id="theme-icon">Dark</span> Mode
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>Material Calculator</h2>
+                <button class="close-sidebar" onclick="toggleSidebar()">×</button>
+            </div>
+            
+            <div class="sidebar-section">
+                <h3>Material Actions</h3>
+                <button class="sidebar-btn" onclick="checkAll()">
+                    <span>✓</span> Check All
+                </button>
+                <button class="sidebar-btn" onclick="uncheckAll()">
+                    <span>✗</span> Uncheck All
+                </button>
+                <button class="sidebar-btn" onclick="clearCollected()">
+                    <span>↺</span> Clear Collected
+                </button>
+                <button class="sidebar-btn" onclick="resetAll()">
+                    <span>⌫</span> Reset All
                 </button>
             </div>
-        </header>
-
-        <!-- GitHub Configuration Section -->
-        <div class="github-config" id="github-config-section">
-            <h3>GitHub Configuration</h3>
-            <div id="github-status" class="github-status"></div>
-            <div class="config-inputs">
-                <div class="config-input-group">
-                    <label for="github-username">GitHub Username</label>
-                    <input type="text" id="github-username" placeholder="your-username">
+            
+            <div class="sidebar-section">
+                <h3>Data Management</h3>
+                <button class="sidebar-btn" onclick="openModal('export-modal')">
+                    <span>📤</span> Export Data
+                </button>
+                <button class="sidebar-btn" onclick="openModal('import-modal')">
+                    <span>📥</span> Import Data
+                </button>
+                <button class="sidebar-btn" onclick="saveToLocalStorage()">
+                    <span>💾</span> Save Locally
+                </button>
+                <button class="sidebar-btn" onclick="loadFromLocalStorage()">
+                    <span>📂</span> Load from Storage
+                </button>
+            </div>
+            
+            <div class="sidebar-section">
+                <h3>Color Scheme</h3>
+                <div class="color-scheme-grid">
+                    <button class="color-scheme-btn color-scheme-default active" 
+                            onclick="changeTheme('default')" title="Default"></button>
+                    <button class="color-scheme-btn color-scheme-dark" 
+                            onclick="changeTheme('dark')" title="Dark"></button>
+                    <button class="color-scheme-btn color-scheme-blue" 
+                            onclick="changeTheme('blue')" title="Blue"></button>
+                    <button class="color-scheme-btn color-scheme-purple" 
+                            onclick="changeTheme('purple')" title="Purple"></button>
+                    <button class="color-scheme-btn color-scheme-green" 
+                            onclick="changeTheme('green')" title="Green"></button>
                 </div>
-                <div class="config-input-group">
-                    <label for="github-repo">Repository Name</label>
-                    <input type="text" id="github-repo" placeholder="litematica-share" value="litematica-share">
-                </div>
-                <div class="config-input-group">
-                    <label for="github-branch">Branch</label>
-                    <input type="text" id="github-branch" placeholder="main" value="main">
-                </div>
-                <div class="config-input-group">
-                    <label for="github-token">GitHub Token</label>
-                    <input type="password" id="github-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+                
+                <div style="margin-top: 15px;">
+                    <h3>Custom Colors</h3>
+                    <div class="custom-color-input">
+                        <input type="color" id="primary-color-picker" value="#4CAF50" onchange="updateCustomTheme()">
+                        <input type="text" id="primary-color-input" placeholder="#4CAF50" value="#4CAF50">
+                    </div>
+                    <button class="sidebar-btn" onclick="applyCustomTheme()" style="margin-top: 10px;">
+                        Apply Custom Theme
+                    </button>
                 </div>
             </div>
-            <div class="config-help">
-                <strong>How to get your GitHub Token:</strong>
-                <ol style="margin-top: 5px; padding-left: 20px;">
-                    <li>Go to GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)</li>
-                    <li>Click "Generate new token" → "Generate new token (classic)"</li>
-                    <li>Select "repo" scope (full control of private repositories)</li>
-                    <li>Generate token and copy it immediately</li>
-                </ol>
+            
+            <div class="sidebar-section">
+                <h3>Settings</h3>
+                <button class="sidebar-btn" onclick="openModal('settings-modal')">
+                    <span>⚙️</span> Settings
+                </button>
+                <button class="sidebar-btn" onclick="printMaterials()">
+                    <span>🖨️</span> Print List
+                </button>
             </div>
-            <div style="display: flex; gap: 10px; margin-top: 15px;">
-                <button onclick="saveGitHubConfig()">Save Configuration</button>
-                <button onclick="testGitHubConnection()" class="secondary">Test Connection</button>
-                <button onclick="clearGitHubConfig()" style="background-color: var(--danger-color);">Clear Config</button>
+            
+            <div class="sidebar-section">
+                <h3>Statistics</h3>
+                <div style="padding: 10px; background: rgba(255,255,255,0.1); border-radius: 5px;">
+                    <div style="font-size: 0.9em; margin-bottom: 5px;">Total Items:</div>
+                    <div style="font-size: 1.2em; font-weight: bold;" id="sidebar-total">0</div>
+                </div>
             </div>
         </div>
-
-        <div class="input-section">
-            <div class="input-options">
-                <button class="tab-button active" onclick="switchTab('upload')">File Upload</button>
-                <button class="tab-button" onclick="switchTab('ascii')">ASCII Text</button>
-                <button class="tab-button" onclick="switchTab('csv')">CSV Text</button>
-            </div>
-
-            <div id="upload-tab" class="tab-content active">
-                <div class="file-upload" onclick="document.getElementById('fileInput').click()">
-                    <p>Drag file here or click to upload</p>
-                    <p><small>Supported formats: .txt, .csv</small></p>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <header>
+                <h1>Litematica Material Calculator</h1>
+                <div class="header-controls">
+                    <button class="quick-action-btn" onclick="checkAll()">Check All</button>
+                    <button class="quick-action-btn" onclick="exportAs('json')">Export JSON</button>
+                    <button class="quick-action-btn" onclick="printMaterials()">Print</button>
                 </div>
-                <input type="file" id="fileInput" accept=".txt,.csv" style="display: none;" onchange="handleFileUpload(event)">
-            </div>
-
-            <div id="ascii-tab" class="tab-content">
-                <textarea id="asciiInput" placeholder="Paste your ASCII material list here..."></textarea>
-                <button onclick="parseAscii()">Parse ASCII List</button>
-            </div>
-
-            <div id="csv-tab" class="tab-content">
-                <textarea id="csvInput" placeholder="Paste your CSV material list here..."></textarea>
-                <button onclick="parseCSV()">Parse CSV List</button>
-            </div>
-
-            <div class="controls">
-                <button onclick="resetAll()">Reset All</button>
-                <button onclick="clearCollected()">Clear Collected</button>
-                <button class="secondary" onclick="checkAll()">Check All</button>
-                <button class="secondary" onclick="uncheckAll()">Uncheck All</button>
-            </div>
-        </div>
-
-        <div class="progress-section">
-            <h2>Progress</h2>
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div>Total Needed</div>
-                    <div class="stat-value" id="total-needed">0</div>
+            </header>
+            
+            <!-- Input Section -->
+            <div class="input-section">
+                <div class="input-options">
+                    <button class="tab-button active" onclick="switchTab('upload')">File Upload</button>
+                    <button class="tab-button" onclick="switchTab('ascii')">ASCII Text</button>
+                    <button class="tab-button" onclick="switchTab('csv')">CSV Text</button>
                 </div>
-                <div class="stat-card">
-                    <div>Collected</div>
-                    <div class="stat-value" id="total-collected">0</div>
+
+                <div id="upload-tab" class="tab-content active">
+                    <div class="file-upload" onclick="document.getElementById('fileInput').click()">
+                        <div>📁</div>
+                        <p>Drag file here or click to upload</p>
+                        <p><small>Supported formats: .txt, .csv, .json</small></p>
+                    </div>
+                    <input type="file" id="fileInput" accept=".txt,.csv,.json" style="display: none;" onchange="handleFileUpload(event)">
                 </div>
-                <div class="stat-card">
-                    <div>Missing</div>
-                    <div class="stat-value" id="total-missing">0</div>
+
+                <div id="ascii-tab" class="tab-content">
+                    <textarea id="asciiInput" placeholder="Paste your ASCII material list here..."></textarea>
+                    <button onclick="parseAscii()">Parse ASCII List</button>
                 </div>
-                <div class="stat-card">
-                    <div>Progress</div>
-                    <div class="stat-value" id="progress-percent">0%</div>
+
+                <div id="csv-tab" class="tab-content">
+                    <textarea id="csvInput" placeholder="Paste your CSV material list here..."></textarea>
+                    <button onclick="parseCSV()">Parse CSV List</button>
                 </div>
             </div>
-            <div class="progress-bar">
-                <div class="progress-fill" id="progress-fill">0%</div>
+            
+            <!-- Progress Section -->
+            <div class="progress-section">
+                <h2>Progress Overview</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div>Total Needed</div>
+                        <div class="stat-value" id="total-needed">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div>Collected</div>
+                        <div class="stat-value" id="total-collected">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div>Missing</div>
+                        <div class="stat-value" id="total-missing">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div>Progress</div>
+                        <div class="stat-value" id="progress-percent">0%</div>
+                    </div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill">0%</div>
+                </div>
+                <div class="progress-labels">
+                    <span>0%</span>
+                    <span>100%</span>
+                </div>
+            </div>
+            
+            <!-- Filters -->
+            <div class="filters">
+                <select id="sortFilter" onchange="filterMaterials()">
+                    <option value="all">All Items</option>
+                    <option value="missing">Missing Only</option>
+                    <option value="collected">Collected Only</option>
+                    <option value="most">Most Needed</option>
+                    <option value="least">Least Needed</option>
+                    <option value="name_asc">Name A-Z</option>
+                    <option value="name_desc">Name Z-A</option>
+                </select>
+                <input type="text" id="searchInput" placeholder="Search items..." oninput="filterMaterials()">
+                <div class="unit-selector">
+                    <span>Units:</span>
+                    <button class="unit-btn active" onclick="changeUnit('items')">Items</button>
+                    <button class="unit-btn" onclick="changeUnit('stacks')">Stacks</button>
+                    <button class="unit-btn" onclick="changeUnit('shulker')">Shulker</button>
+                    <button class="unit-btn" onclick="changeUnit('double')">Double Chest</button>
+                </div>
+                <div class="layout-options">
+                    <button class="layout-btn active" onclick="changeLayout('grid')">Grid View</button>
+                    <button class="layout-btn" onclick="changeLayout('list')">List View</button>
+                </div>
+            </div>
+            
+            <!-- Materials Container -->
+            <div class="materials-container">
+                <div id="materials-grid" class="materials-grid active"></div>
+                <div id="materials-list" class="materials-list"></div>
+                <div id="empty-state" class="empty-state" style="display: block;">
+                    <div>📋</div>
+                    <h3>No Materials Loaded</h3>
+                    <p>Upload a Litematica material list or paste it as text</p>
+                    <p><small>Try using the File Upload or ASCII/CSV tabs above</small></p>
+                </div>
+            </div>
+            
+            <!-- Data Management Section -->
+            <div class="data-section">
+                <h2>Data Management</h2>
+                <p>Save, load, or export your material lists</p>
+                <div class="data-options">
+                    <button class="data-btn" onclick="saveToLocalStorage()">Save to Browser</button>
+                    <button class="data-btn" onclick="loadFromLocalStorage()">Load from Browser</button>
+                    <button class="data-btn" onclick="exportAs('json')">Export as JSON</button>
+                    <button class="data-btn" onclick="exportAs('csv')">Export as CSV</button>
+                    <button class="data-btn" onclick="exportAs('ascii')">Export as ASCII</button>
+                    <button class="data-btn danger" onclick="clearLocalStorage()">Clear Browser Storage</button>
+                </div>
             </div>
         </div>
-
-        <div class="filters">
-            <select id="sortFilter" onchange="filterMaterials()">
-                <option value="all">All Items</option>
-                <option value="missing">Missing Only</option>
-                <option value="collected">Collected Only</option>
-                <option value="most">Most Needed</option>
-                <option value="least">Least Needed</option>
-            </select>
-            <input type="text" id="searchInput" placeholder="Search items..." oninput="filterMaterials()">
-            <div class="unit-selector">
-                <span>Units:</span>
-                <button class="unit-btn active" onclick="changeUnit('items')">Items</button>
-                <button class="unit-btn" onclick="changeUnit('stacks')">Stacks</button>
-                <button class="unit-btn" onclick="changeUnit('shulker')">Shulker</button>
-                <button class="unit-btn" onclick="changeUnit('double')">Double Chest</button>
+    </div>
+    
+    <!-- Export Modal -->
+    <div class="modal" id="export-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Export Data</h2>
+                <button class="close-modal" onclick="closeModal('export-modal')">×</button>
             </div>
-            <div class="layout-options">
-                <button class="layout-btn active" onclick="changeLayout('grid')">Grid View</button>
-                <button class="layout-btn" onclick="changeLayout('list')">List View</button>
-            </div>
-        </div>
-
-        <div class="materials-container">
-            <div id="materials-grid" class="materials-grid active">
-                <!-- Material cards will be inserted here -->
-            </div>
-            <div id="materials-list" class="materials-list">
-                <!-- Material rows will be inserted here -->
-            </div>
-            <div id="empty-state" class="empty-state" style="display: none;">
-                <h3>No Materials Loaded</h3>
-                <p>Upload a Litematica material list or paste it as text</p>
+            <div class="modal-body">
+                <p>Choose export format:</p>
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button onclick="exportAs('json')" style="flex: 1;">JSON</button>
+                    <button onclick="exportAs('csv')" style="flex: 1;">CSV</button>
+                    <button onclick="exportAs('ascii')" style="flex: 1;">ASCII</button>
+                </div>
+                <div style="margin-top: 20px; padding: 15px; background-color: var(--card-bg); border-radius: 5px;">
+                    <h3>Quick Export</h3>
+                    <p style="font-size: 0.9em; margin-top: 10px;">Copy to clipboard:</p>
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <button onclick="copyToClipboard('json')" style="flex: 1;">Copy JSON</button>
+                        <button onclick="copyToClipboard('csv')" style="flex: 1;">Copy CSV</button>
+                    </div>
+                </div>
             </div>
         </div>
-
-        <div class="share-section">
-            <h2>Share & Sync (GitHub)</h2>
-            <p>
-                <span class="status-indicator" id="status-indicator"></span>
-                <span id="status-text">Not connected</span>
-            </p>
-            <button onclick="createShare()" id="create-share-btn">Create Share Link</button>
-            <div class="share-url-container">
-                <input type="text" id="shareUrl" class="share-url" readonly placeholder="Share URL will be generated...">
-                <button class="copy-btn" onclick="copyShareUrl()">Copy</button>
+    </div>
+    
+    <!-- Import Modal -->
+    <div class="modal" id="import-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Import Data</h2>
+                <button class="close-modal" onclick="closeModal('import-modal')">×</button>
             </div>
-            <div class="input-group" style="margin-top: 15px;">
-                <input type="text" id="joinShareId" placeholder="Share ID to join">
-                <button onclick="joinShare()">Join Share</button>
-            </div>
-            <div style="margin-top: 15px;">
-                <button onclick="deleteShare()" style="background-color: var(--danger-color); margin-right: 10px;">Delete Share</button>
-                <button onclick="stopSharing()" style="background-color: var(--warning-color);">Leave Share</button>
+            <div class="modal-body">
+                <p>Select import method:</p>
+                <div style="margin-top: 15px;">
+                    <button onclick="document.getElementById('jsonFileInput').click()" style="width: 100%; margin-bottom: 10px;">
+                        Import JSON File
+                    </button>
+                    <input type="file" id="jsonFileInput" accept=".json" style="display: none;" onchange="importJSONFile(event)">
+                    
+                    <textarea id="importJsonText" placeholder='Paste JSON data here...' style="width: 100%; height: 150px; margin: 10px 0;"></textarea>
+                    <button onclick="importFromJSONText()" style="width: 100%;">Import from Text</button>
+                </div>
             </div>
         </div>
-
-        <div class="export-options">
-            <button onclick="exportAs('ascii')">Export as ASCII</button>
-            <button onclick="exportAs('csv')">Export as CSV</button>
-            <button onclick="exportAs('json')">Export as JSON</button>
+    </div>
+    
+    <!-- Settings Modal -->
+    <div class="modal" id="settings-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Settings</h2>
+                <button class="close-modal" onclick="closeModal('settings-modal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-item">
+                    <label for="auto-save">Auto-save interval (minutes)</label>
+                    <input type="range" id="auto-save" min="1" max="60" value="5" onchange="updateAutoSave(this.value)">
+                    <div style="text-align: center; margin-top: 5px;" id="auto-save-value">5 minutes</div>
+                </div>
+                
+                <div class="setting-item">
+                    <label for="default-unit">Default Unit</label>
+                    <select id="default-unit" onchange="saveSettings()">
+                        <option value="items">Items</option>
+                        <option value="stacks">Stacks</option>
+                        <option value="shulker">Shulker</option>
+                        <option value="double">Double Chest</option>
+                    </select>
+                </div>
+                
+                <div class="setting-item">
+                    <label for="default-layout">Default Layout</label>
+                    <select id="default-layout" onchange="saveSettings()">
+                        <option value="grid">Grid View</option>
+                        <option value="list">List View</option>
+                    </select>
+                </div>
+                
+                <div class="setting-item">
+                    <label>
+                        <input type="checkbox" id="animations" checked onchange="saveSettings()">
+                        Enable animations
+                    </label>
+                </div>
+                
+                <div class="setting-item">
+                    <label>
+                        <input type="checkbox" id="notifications" checked onchange="saveSettings()">
+                        Enable notifications
+                    </label>
+                </div>
+                
+                <div class="setting-item">
+                    <label>
+                        <input type="checkbox" id="auto-parse" checked onchange="saveSettings()">
+                        Auto-parse on paste
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="resetSettings()">Reset Settings</button>
+                <button onclick="closeModal('settings-modal')">Close</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // GitHub Configuration
-        const GITHUB_CONFIG = {
-            username: '',
-            repo: '',
-            branch: 'main',
-            token: ''
-        };
-
         // Global variables
         let materials = [];
         let filteredMaterials = [];
         let currentUnit = 'items';
         let currentLayout = 'grid';
-        let shareId = null;
-        let isHost = false;
-        let lastSha = null;
-        let pollInterval = null;
-        let lastSyncTime = 0;
-        let syncInProgress = false;
+        let autoSaveInterval = null;
+        let settings = {
+            autoSaveMinutes: 5,
+            defaultUnit: 'items',
+            defaultLayout: 'grid',
+            animations: true,
+            notifications: true,
+            autoParse: true,
+            theme: 'default'
+        };
 
-        // Initialize GitHub config from localStorage
-        function loadGitHubConfig() {
-            const savedConfig = localStorage.getItem('github_config');
-            if (savedConfig) {
-                const config = JSON.parse(savedConfig);
-                GITHUB_CONFIG.username = config.username || '';
-                GITHUB_CONFIG.repo = config.repo || '';
-                GITHUB_CONFIG.branch = config.branch || 'main';
-                GITHUB_CONFIG.token = config.token || '';
-                
-                // Update UI
-                document.getElementById('github-username').value = GITHUB_CONFIG.username;
-                document.getElementById('github-repo').value = GITHUB_CONFIG.repo;
-                document.getElementById('github-branch').value = GITHUB_CONFIG.branch;
-                document.getElementById('github-token').value = GITHUB_CONFIG.token;
-                
-                updateGitHubStatus('Configuration loaded', true);
-                return true;
-            }
-            return false;
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSettings();
+            loadFromLocalStorage();
+            setupAutoSave();
+            updateSidebarStats();
+        });
+
+        // Sidebar functions
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('active');
         }
 
-        // Save GitHub config to localStorage
-        function saveGitHubConfig() {
-            GITHUB_CONFIG.username = document.getElementById('github-username').value.trim();
-            GITHUB_CONFIG.repo = document.getElementById('github-repo').value.trim();
-            GITHUB_CONFIG.branch = document.getElementById('github-branch').value.trim() || 'main';
-            GITHUB_CONFIG.token = document.getElementById('github-token').value.trim();
-            
-            if (!GITHUB_CONFIG.username || !GITHUB_CONFIG.repo || !GITHUB_CONFIG.token) {
-                alert('Please fill in all fields: Username, Repository, and Token');
-                return;
-            }
-            
-            localStorage.setItem('github_config', JSON.stringify(GITHUB_CONFIG));
-            updateGitHubStatus('Configuration saved', true);
-            alert('GitHub configuration saved successfully!');
+        // Modal functions
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
         }
 
-        // Clear GitHub config
-        function clearGitHubConfig() {
-            if (confirm('Are you sure you want to clear your GitHub configuration?')) {
-                localStorage.removeItem('github_config');
-                GITHUB_CONFIG.username = '';
-                GITHUB_CONFIG.repo = '';
-                GITHUB_CONFIG.branch = 'main';
-                GITHUB_CONFIG.token = '';
-                
-                document.getElementById('github-username').value = '';
-                document.getElementById('github-repo').value = '';
-                document.getElementById('github-branch').value = 'main';
-                document.getElementById('github-token').value = '';
-                
-                updateGitHubStatus('Configuration cleared', false);
-                stopPolling();
-                stopSharing();
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        };
+
+        // Settings functions
+        function loadSettings() {
+            const saved = localStorage.getItem('material_calc_settings');
+            if (saved) {
+                settings = JSON.parse(saved);
+                applySettings();
             }
         }
 
-        // Test GitHub connection
-        async function testGitHubConnection() {
-            if (!GITHUB_CONFIG.username || !GITHUB_CONFIG.repo || !GITHUB_CONFIG.token) {
-                alert('Please save your configuration first');
-                return;
-            }
+        function saveSettings() {
+            settings.defaultUnit = document.getElementById('default-unit').value;
+            settings.defaultLayout = document.getElementById('default-layout').value;
+            settings.animations = document.getElementById('animations').checked;
+            settings.notifications = document.getElementById('notifications').checked;
+            settings.autoParse = document.getElementById('auto-parse').checked;
             
-            updateGitHubStatus('Testing connection...', false);
-            
-            try {
-                const response = await fetch(
-                    `https://api.github.com/repos/${GITHUB_CONFIG.username}/${GITHUB_CONFIG.repo}`,
-                    {
-                        headers: {
-                            'Authorization': `token ${GITHUB_CONFIG.token}`,
-                            'Accept': 'application/vnd.github.v3+json'
-                        }
-                    }
-                );
-                
-                if (response.ok) {
-                    updateGitHubStatus('✓ Connection successful!', true);
-                } else if (response.status === 404) {
-                    updateGitHubStatus('✗ Repository not found', false);
-                    alert('Repository not found. Please check the username and repository name.');
-                } else if (response.status === 401) {
-                    updateGitHubStatus('✗ Invalid token', false);
-                    alert('Invalid GitHub token. Please check your token and make sure it has "repo" scope.');
-                } else {
-                    updateGitHubStatus(`✗ Error: ${response.status}`, false);
-                }
-            } catch (error) {
-                updateGitHubStatus('✗ Connection failed', false);
-                console.error('Connection test error:', error);
-            }
+            localStorage.setItem('material_calc_settings', JSON.stringify(settings));
+            showNotification('Settings saved');
         }
 
-        // Update GitHub status display
-        function updateGitHubStatus(message, connected) {
-            const statusDiv = document.getElementById('github-status');
-            statusDiv.textContent = message;
-            statusDiv.className = `github-status ${connected ? 'status-connected' : 'status-disconnected'}`;
+        function applySettings() {
+            document.getElementById('default-unit').value = settings.defaultUnit;
+            document.getElementById('default-layout').value = settings.defaultLayout;
+            document.getElementById('animations').checked = settings.animations;
+            document.getElementById('notifications').checked = settings.notifications;
+            document.getElementById('auto-parse').checked = settings.autoParse;
+            
+            changeUnit(settings.defaultUnit);
+            changeLayout(settings.defaultLayout);
+            changeTheme(settings.theme);
         }
 
-        // GitHub API request helper
-        async function githubApiRequest(endpoint, method = 'GET', data = null) {
-            if (!GITHUB_CONFIG.username || !GITHUB_CONFIG.repo || !GITHUB_CONFIG.token) {
-                throw new Error('GitHub configuration incomplete');
-            }
-            
-            const url = `https://api.github.com/repos/${GITHUB_CONFIG.username}/${GITHUB_CONFIG.repo}/${endpoint}`;
-            
-            const options = {
-                method: method,
-                headers: {
-                    'Authorization': `token ${GITHUB_CONFIG.token}`,
-                    'Accept': 'application/vnd.github.v3+json',
-                    'Content-Type': 'application/json'
-                }
-            };
-            
-            if (data) {
-                options.body = JSON.stringify(data);
-            }
-            
-            try {
-                const response = await fetch(url, options);
-                
-                // Handle rate limiting
-                if (response.status === 403 && response.headers.get('X-RateLimit-Remaining') === '0') {
-                    const resetTime = new Date(parseInt(response.headers.get('X-RateLimit-Reset')) * 1000);
-                    throw new Error(`GitHub API rate limit exceeded. Resets at ${resetTime.toLocaleTimeString()}`);
-                }
-                
-                if (response.status === 404) {
-                    return null;
-                }
-                
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`GitHub API Error ${response.status}: ${errorText}`);
-                }
-                
-                if (method !== 'DELETE') {
-                    return await response.json();
-                }
-                return true;
-            } catch (error) {
-                console.error('GitHub API request failed:', error);
-                updateStatus(`API Error: ${error.message}`, false);
-                throw error;
-            }
-        }
-
-        // Create a new share
-        async function createShare() {
-            if (!GITHUB_CONFIG.token) {
-                alert('Please configure GitHub first');
-                document.getElementById('github-config-section').scrollIntoView();
-                return;
-            }
-            
-            if (materials.length === 0) {
-                alert('Please load a material list first');
-                return;
-            }
-            
-            shareId = 'share_' + Math.random().toString(36).substr(2, 9);
-            isHost = true;
-            
-            const url = `${window.location.origin}${window.location.pathname}?share=${shareId}`;
-            document.getElementById('shareUrl').value = url;
-            
-            // Prepare share data
-            const shareData = {
-                materials: materials,
-                created: Date.now(),
-                updated: Date.now(),
-                host: true,
-                version: 1
-            };
-            
-            // Base64 encode for GitHub
-            const content = btoa(JSON.stringify(shareData, null, 2));
-            
-            try {
-                // Check if file exists first
-                const existingFile = await githubApiRequest(`contents/shares/${shareId}.json`);
-                
-                let result;
-                if (existingFile) {
-                    // Update existing file
-                    result = await githubApiRequest(`contents/shares/${shareId}.json`, 'PUT', {
-                        message: `Update share: ${shareId}`,
-                        content: content,
-                        sha: existingFile.sha,
-                        branch: GITHUB_CONFIG.branch
-                    });
-                } else {
-                    // Create new file
-                    result = await githubApiRequest(`contents/shares/${shareId}.json`, 'PUT', {
-                        message: `Create share: ${shareId}`,
-                        content: content,
-                        branch: GITHUB_CONFIG.branch
-                    });
-                }
-                
-                if (result) {
-                    lastSha = result.content.sha;
-                    updateStatus('Connected (Host)', true);
-                    
-                    // Start polling for updates
-                    startPolling();
-                    
-                    // Update URL
-                    window.history.pushState({}, '', `?share=${shareId}`);
-                    
-                    alert('Share created successfully!');
-                }
-            } catch (error) {
-                console.error('Error creating share:', error);
-                alert(`Failed to create share: ${error.message}`);
-            }
-        }
-
-        // Join an existing share
-        async function joinShare() {
-            const id = document.getElementById('joinShareId').value.trim();
-            if (!id) {
-                alert('Please enter a share ID');
-                return;
-            }
-            
-            if (!GITHUB_CONFIG.token) {
-                alert('Please configure GitHub first');
-                document.getElementById('github-config-section').scrollIntoView();
-                return;
-            }
-            
-            shareId = id;
-            isHost = false;
-            const url = `${window.location.origin}${window.location.pathname}?share=${shareId}`;
-            document.getElementById('shareUrl').value = url;
-            
-            try {
-                // Load share from GitHub
-                const result = await githubApiRequest(`contents/shares/${shareId}.json`);
-                
-                if (!result || !result.content) {
-                    alert('Share not found. Please check the share ID.');
-                    return;
-                }
-                
-                const shareData = JSON.parse(atob(result.content));
-                
-                if (shareData.materials) {
-                    materials = shareData.materials;
-                    lastSha = result.sha;
-                    
-                    updateStats();
-                    filterMaterials();
-                    renderMaterials();
-                    
-                    updateStatus('Connected', true);
-                    
-                    // Start polling
-                    startPolling();
-                    
-                    // Update URL
-                    window.history.pushState({}, '', `?share=${shareId}`);
-                    
-                    alert('Successfully joined share!');
-                } else {
-                    alert('Invalid share data format.');
-                }
-            } catch (error) {
-                console.error('Error joining share:', error);
-                alert(`Failed to join share: ${error.message}`);
-            }
-        }
-
-        // Sync with GitHub
-        async function syncWithServer() {
-            if (!shareId || !GITHUB_CONFIG.token || syncInProgress) return;
-            
-            syncInProgress = true;
-            lastSyncTime = Date.now();
-            
-            try {
-                // Get current file to get SHA
-                const currentFile = await githubApiRequest(`contents/shares/${shareId}.json`);
-                if (!currentFile) {
-                    console.error('Share file not found during sync');
-                    syncInProgress = false;
-                    return;
-                }
-                
-                // Prepare updated data
-                const shareData = {
-                    materials: materials,
-                    created: currentFile.content ? JSON.parse(atob(currentFile.content)).created : Date.now(),
-                    updated: Date.now(),
-                    host: isHost,
-                    version: 1
+        function resetSettings() {
+            if (confirm('Reset all settings to defaults?')) {
+                settings = {
+                    autoSaveMinutes: 5,
+                    defaultUnit: 'items',
+                    defaultLayout: 'grid',
+                    animations: true,
+                    notifications: true,
+                    autoParse: true,
+                    theme: 'default'
                 };
-                
-                const content = btoa(JSON.stringify(shareData, null, 2));
-                
-                // Update file on GitHub
-                const result = await githubApiRequest(`contents/shares/${shareId}.json`, 'PUT', {
-                    message: `Update: ${shareId} @ ${new Date().toLocaleTimeString()}`,
-                    content: content,
-                    sha: currentFile.sha,
-                    branch: GITHUB_CONFIG.branch
-                });
-                
-                if (result) {
-                    lastSha = result.content.sha;
-                    updateStatus('Synced', true);
+                localStorage.removeItem('material_calc_settings');
+                applySettings();
+                showNotification('Settings reset');
+            }
+        }
+
+        function updateAutoSave(minutes) {
+            settings.autoSaveMinutes = minutes;
+            document.getElementById('auto-save-value').textContent = minutes + ' minutes';
+            setupAutoSave();
+        }
+
+        function setupAutoSave() {
+            if (autoSaveInterval) {
+                clearInterval(autoSaveInterval);
+            }
+            
+            autoSaveInterval = setInterval(() => {
+                if (materials.length > 0) {
+                    saveToLocalStorage();
+                    showNotification('Auto-saved progress', 'info');
                 }
-            } catch (error) {
-                console.error('Sync error:', error);
-                updateStatus('Sync failed', false);
-            } finally {
-                syncInProgress = false;
-            }
+            }, settings.autoSaveMinutes * 60 * 1000);
         }
 
-        // Check for updates from GitHub
-        async function checkForUpdates() {
-            if (!shareId || !GITHUB_CONFIG.token) return;
+        // Theme functions
+        function changeTheme(themeName) {
+            document.documentElement.setAttribute('data-theme', themeName);
+            settings.theme = themeName;
             
-            try {
-                const result = await githubApiRequest(`contents/shares/${shareId}.json`);
-                
-                if (!result || !result.sha) {
-                    console.log('Share file not found during poll');
-                    return;
-                }
-                
-                // Check if file has changed
-                if (result.sha !== lastSha) {
-                    const shareData = JSON.parse(atob(result.content));
-                    
-                    // Only update if the data is newer than our last sync
-                    if (shareData.updated > lastSyncTime || !isHost) {
-                        materials = shareData.materials;
-                        lastSha = result.sha;
-                        
-                        updateStats();
-                        filterMaterials();
-                        renderMaterials();
-                        
-                        updateStatus('Updated from server', true);
-                        console.log('Updated from GitHub');
-                    }
-                }
-            } catch (error) {
-                console.error('Polling error:', error);
-            }
+            // Update active button
+            document.querySelectorAll('.color-scheme-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.color-scheme-${themeName}`).classList.add('active');
+            
+            saveSettings();
         }
 
-        // Start polling for updates
-        function startPolling() {
-            stopPolling();
-            
-            // Initial check
-            checkForUpdates();
-            
-            // Poll every 3 seconds
-            pollInterval = setInterval(checkForUpdates, 3000);
+        function updateCustomTheme() {
+            const picker = document.getElementById('primary-color-picker');
+            const input = document.getElementById('primary-color-input');
+            input.value = picker.value;
         }
 
-        // Stop polling
-        function stopPolling() {
-            if (pollInterval) {
-                clearInterval(pollInterval);
-                pollInterval = null;
-            }
-        }
-
-        // Delete a share
-        async function deleteShare() {
-            if (!shareId || !GITHUB_CONFIG.token) {
-                alert('No active share to delete');
-                return;
-            }
-            
-            if (!isHost) {
-                alert('Only the host can delete a share');
-                return;
-            }
-            
-            if (!confirm('Are you sure you want to delete this share? This cannot be undone.')) {
-                return;
-            }
-            
-            try {
-                const currentFile = await githubApiRequest(`contents/shares/${shareId}.json`);
-                
-                if (currentFile) {
-                    await githubApiRequest(`contents/shares/${shareId}.json`, 'DELETE', {
-                        message: `Delete share: ${shareId}`,
-                        sha: currentFile.sha,
-                        branch: GITHUB_CONFIG.branch
-                    });
-                    
-                    alert('Share deleted successfully');
-                    stopSharing();
-                }
-            } catch (error) {
-                console.error('Delete error:', error);
-                alert(`Failed to delete share: ${error.message}`);
-            }
-        }
-
-        // Stop sharing
-        function stopSharing() {
-            stopPolling();
-            
-            shareId = null;
-            isHost = false;
-            lastSha = null;
-            
-            document.getElementById('shareUrl').value = '';
-            document.getElementById('joinShareId').value = '';
-            updateStatus('Not connected', false);
-            
-            // Remove share parameter from URL
-            const url = new URL(window.location);
-            url.searchParams.delete('share');
-            window.history.pushState({}, '', url.toString());
-        }
-
-        // Update status display
-        function updateStatus(message, connected) {
-            const indicator = document.getElementById('status-indicator');
-            const text = document.getElementById('status-text');
-            
-            if (indicator && text) {
-                indicator.className = 'status-indicator ' + (connected ? 'status-connected' : 'status-disconnected');
-                text.textContent = message;
-            }
-        }
-
-        // Copy share URL to clipboard
-        function copyShareUrl() {
-            const urlInput = document.getElementById('shareUrl');
-            if (!urlInput.value) {
-                alert('No share URL to copy');
-                return;
-            }
-            
-            urlInput.select();
-            document.execCommand('copy');
-            
-            // Visual feedback
-            const originalText = urlInput.placeholder;
-            urlInput.placeholder = 'URL copied!';
-            setTimeout(() => {
-                urlInput.placeholder = originalText;
-            }, 2000);
-        }
-
-        // Check URL parameters on load
-        function checkUrlParams() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const shareParam = urlParams.get('share');
-            
-            if (shareParam) {
-                shareId = shareParam;
-                document.getElementById('shareUrl').value = window.location.href;
-                document.getElementById('joinShareId').value = shareId;
-                
-                // Auto-join if we have config
-                if (GITHUB_CONFIG.token) {
-                    setTimeout(() => autoJoinShare(), 1000);
-                }
-            }
-        }
-
-        // Auto-join share from URL
-        async function autoJoinShare() {
-            if (!shareId || !GITHUB_CONFIG.token) return;
-            
-            try {
-                const result = await githubApiRequest(`contents/shares/${shareId}.json`);
-                
-                if (result && result.content) {
-                    const shareData = JSON.parse(atob(result.content));
-                    
-                    if (shareData.materials) {
-                        materials = shareData.materials;
-                        lastSha = result.sha;
-                        
-                        updateStats();
-                        filterMaterials();
-                        renderMaterials();
-                        
-                        updateStatus('Connected (from URL)', true);
-                        startPolling();
-                    }
-                } else {
-                    updateStatus('Share not found', false);
-                }
-            } catch (error) {
-                console.error('Auto-join error:', error);
-                updateStatus('Failed to load share', false);
+        function applyCustomTheme() {
+            const color = document.getElementById('primary-color-input').value;
+            if (/^#[0-9A-F]{6}$/i.test(color)) {
+                document.documentElement.style.setProperty('--primary-color', color);
+                document.getElementById('primary-color-picker').value = color;
+                showNotification('Custom theme applied');
+            } else {
+                alert('Please enter a valid hex color (e.g., #4CAF50)');
             }
         }
 
@@ -1272,12 +1353,26 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 const content = e.target.result;
+                
                 if (file.name.endsWith('.txt')) {
                     document.getElementById('asciiInput').value = content;
-                    parseAscii();
+                    if (settings.autoParse) parseAscii();
                 } else if (file.name.endsWith('.csv')) {
                     document.getElementById('csvInput').value = content;
-                    parseCSV();
+                    if (settings.autoParse) parseCSV();
+                } else if (file.name.endsWith('.json')) {
+                    try {
+                        const data = JSON.parse(content);
+                        if (data.materials && Array.isArray(data.materials)) {
+                            materials = data.materials;
+                            initializeMaterials();
+                            showNotification('JSON file imported successfully');
+                        } else {
+                            alert('Invalid JSON format. Expected materials array.');
+                        }
+                    } catch (error) {
+                        alert('Error parsing JSON file: ' + error.message);
+                    }
                 }
             };
             reader.readAsText(file);
@@ -1316,6 +1411,7 @@
             }
 
             initializeMaterials();
+            showNotification('ASCII list parsed successfully');
         }
 
         // CSV parser
@@ -1354,6 +1450,7 @@
             }
 
             initializeMaterials();
+            showNotification('CSV list parsed successfully');
         }
 
         // Initialize materials
@@ -1361,6 +1458,11 @@
             updateStats();
             filterMaterials();
             document.getElementById('empty-state').style.display = 'none';
+            updateSidebarStats();
+            
+            if (settings.animations) {
+                animateProgressBar();
+            }
         }
 
         // Unit conversion
@@ -1394,7 +1496,7 @@
                     if (itemsFromDouble > 0) resultDouble += `${resultDouble ? ' + ' : ''}${itemsFromDouble}`;
                     return resultDouble || '0';
                 default:
-                    return count.toString();
+                    return count.toLocaleString();
             }
         }
 
@@ -1410,9 +1512,10 @@
         function changeUnit(unit) {
             currentUnit = unit;
             document.querySelectorAll('.unit-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
+            document.querySelector(`.unit-btn[onclick*="${unit}"]`).classList.add('active');
             renderMaterials();
             updateStats();
+            updateSidebarStats();
         }
 
         // Filter and sort materials
@@ -1440,6 +1543,12 @@
                     break;
                 case 'least':
                     filteredMaterials.sort((a, b) => a.total - b.total);
+                    break;
+                case 'name_asc':
+                    filteredMaterials.sort((a, b) => a.name.localeCompare(b.name));
+                    break;
+                case 'name_desc':
+                    filteredMaterials.sort((a, b) => b.name.localeCompare(a.name));
                     break;
                 default:
                     filteredMaterials.sort((a, b) => b.total - a.total);
@@ -1512,7 +1621,7 @@
                                max="${material.total}"
                                onchange="updateCollected(${index}, this.value)"
                                placeholder="Amount">
-                        <button onclick="setToMax(${index})">Max</button>
+                        <button onclick="setToMax(${index})" class="secondary">Max</button>
                     </div>
                 `;
                 container.appendChild(card);
@@ -1544,14 +1653,14 @@
                                max="${material.total}"
                                style="width: 80px;"
                                onchange="updateCollected(${index}, this.value)">
-                        <button onclick="setToMax(${index})">Max</button>
+                        <button onclick="setToMax(${index})" class="secondary">Max</button>
                     </div>
                 `;
                 container.appendChild(row);
             });
         }
 
-        // Toggle material
+        // Material actions
         function toggleMaterial(index, checked) {
             const materialIndex = materials.findIndex(m => m.name === filteredMaterials[index].name);
             if (materialIndex !== -1) {
@@ -1565,11 +1674,10 @@
                 materials[materialIndex].checked = checked;
                 updateStats();
                 filterMaterials();
-                if (shareId) syncWithServer();
+                updateSidebarStats();
             }
         }
 
-        // Update collected amount
         function updateCollected(index, value) {
             const materialIndex = materials.findIndex(m => m.name === filteredMaterials[index].name);
             if (materialIndex !== -1) {
@@ -1579,11 +1687,10 @@
                 materials[materialIndex].checked = newCollected > 0;
                 updateStats();
                 filterMaterials();
-                if (shareId) syncWithServer();
+                updateSidebarStats();
             }
         }
 
-        // Set to maximum
         function setToMax(index) {
             const materialIndex = materials.findIndex(m => m.name === filteredMaterials[index].name);
             if (materialIndex !== -1) {
@@ -1592,11 +1699,12 @@
                 materials[materialIndex].checked = true;
                 updateStats();
                 filterMaterials();
-                if (shareId) syncWithServer();
+                updateSidebarStats();
+                showNotification(`${materials[materialIndex].name} set to maximum`);
             }
         }
 
-        // Update statistics
+        // Statistics
         function updateStats() {
             let totalNeeded = 0;
             let totalCollected = 0;
@@ -1614,8 +1722,30 @@
             document.getElementById('total-collected').textContent = formatCount(totalCollected);
             document.getElementById('total-missing').textContent = formatCount(totalMissing);
             document.getElementById('progress-percent').textContent = progressPercent + '%';
-            document.getElementById('progress-fill').textContent = progressPercent + '%';
-            document.getElementById('progress-fill').style.width = progressPercent + '%';
+            
+            const progressFill = document.getElementById('progress-fill');
+            progressFill.textContent = progressPercent + '%';
+            
+            if (settings.animations) {
+                progressFill.style.transition = 'width 1s ease-in-out';
+                progressFill.style.width = progressPercent + '%';
+            } else {
+                progressFill.style.transition = 'none';
+                progressFill.style.width = progressPercent + '%';
+            }
+        }
+
+        function updateSidebarStats() {
+            let totalItems = 0;
+            materials.forEach(material => {
+                totalItems += material.total;
+            });
+            document.getElementById('sidebar-total').textContent = formatCount(totalItems);
+        }
+
+        function animateProgressBar() {
+            const progressFill = document.getElementById('progress-fill');
+            progressFill.style.transition = 'width 1s ease-in-out';
         }
 
         // Utility functions
@@ -1627,7 +1757,8 @@
             });
             updateStats();
             filterMaterials();
-            if (shareId) syncWithServer();
+            updateSidebarStats();
+            showNotification('All items checked');
         }
 
         function uncheckAll() {
@@ -1638,7 +1769,8 @@
             });
             updateStats();
             filterMaterials();
-            if (shareId) syncWithServer();
+            updateSidebarStats();
+            showNotification('All items unchecked');
         }
 
         function clearCollected() {
@@ -1649,19 +1781,55 @@
             });
             updateStats();
             filterMaterials();
-            if (shareId) syncWithServer();
+            updateSidebarStats();
+            showNotification('Collected items cleared');
         }
 
         function resetAll() {
-            materials = [];
-            filteredMaterials = [];
-            stopSharing();
-            document.getElementById('asciiInput').value = '';
-            document.getElementById('csvInput').value = '';
-            updateStatus('Not connected', false);
-            renderMaterials();
-            updateStats();
-            document.getElementById('empty-state').style.display = 'block';
+            if (confirm('Are you sure you want to reset everything?')) {
+                materials = [];
+                filteredMaterials = [];
+                document.getElementById('asciiInput').value = '';
+                document.getElementById('csvInput').value = '';
+                renderMaterials();
+                updateStats();
+                updateSidebarStats();
+                showNotification('All data reset');
+            }
+        }
+
+        // Data management
+        function saveToLocalStorage() {
+            const data = {
+                materials: materials,
+                timestamp: new Date().toISOString(),
+                settings: settings
+            };
+            localStorage.setItem('material_calc_data', JSON.stringify(data));
+            showNotification('Data saved to browser');
+        }
+
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem('material_calc_data');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    if (data.materials && Array.isArray(data.materials)) {
+                        materials = data.materials;
+                        initializeMaterials();
+                        showNotification('Data loaded from browser');
+                    }
+                } catch (error) {
+                    console.error('Error loading from localStorage:', error);
+                }
+            }
+        }
+
+        function clearLocalStorage() {
+            if (confirm('Clear all data from browser storage?')) {
+                localStorage.removeItem('material_calc_data');
+                showNotification('Browser storage cleared');
+            }
         }
 
         // Export functions
@@ -1672,26 +1840,32 @@
             }
             
             let content = '';
-            const filename = `litematica_materials_${new Date().toISOString().split('T')[0]}`;
+            const timestamp = new Date().toISOString().split('T')[0];
+            const filename = `litematica_materials_${timestamp}`;
 
             switch(format) {
                 case 'ascii':
                     content = generateAsciiExport();
                     downloadFile(filename + '.txt', content);
+                    showNotification('Exported as ASCII');
                     break;
                 case 'csv':
                     content = generateCSVExport();
                     downloadFile(filename + '.csv', content);
+                    showNotification('Exported as CSV');
                     break;
                 case 'json':
                     content = JSON.stringify({
                         materials: materials,
                         timestamp: new Date().toISOString(),
+                        settings: settings,
                         stats: getCurrentStats()
                     }, null, 2);
                     downloadFile(filename + '.json', content);
+                    showNotification('Exported as JSON');
                     break;
             }
+            closeModal('export-modal');
         }
 
         function generateAsciiExport() {
@@ -1741,24 +1915,128 @@
             const a = document.createElement('a');
             a.href = url;
             a.download = filename;
+            document.body.appendChild(a);
             a.click();
+            document.body.removeChild(a);
             URL.revokeObjectURL(url);
         }
 
-        // Theme toggle
-        function toggleTheme() {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const icon = document.getElementById('theme-icon');
-            
-            if (currentTheme === 'dark') {
-                document.documentElement.removeAttribute('data-theme');
-                icon.textContent = 'Dark';
-                event.target.innerHTML = 'Dark Mode';
-            } else {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                icon.textContent = 'Light';
-                event.target.innerHTML = 'Light Mode';
+        // Import functions
+        function importJSONFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.materials && Array.isArray(data.materials)) {
+                        materials = data.materials;
+                        if (data.settings) {
+                            Object.assign(settings, data.settings);
+                            applySettings();
+                        }
+                        initializeMaterials();
+                        showNotification('JSON file imported successfully');
+                        closeModal('import-modal');
+                    } else {
+                        alert('Invalid JSON format. Expected materials array.');
+                    }
+                } catch (error) {
+                    alert('Error parsing JSON file: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function importFromJSONText() {
+            const text = document.getElementById('importJsonText').value;
+            if (!text.trim()) {
+                alert('Please paste JSON data');
+                return;
             }
+
+            try {
+                const data = JSON.parse(text);
+                if (data.materials && Array.isArray(data.materials)) {
+                    materials = data.materials;
+                    if (data.settings) {
+                        Object.assign(settings, data.settings);
+                        applySettings();
+                    }
+                    initializeMaterials();
+                    showNotification('JSON data imported successfully');
+                    closeModal('import-modal');
+                } else {
+                    alert('Invalid JSON format. Expected materials array.');
+                }
+            } catch (error) {
+                alert('Error parsing JSON: ' + error.message);
+            }
+        }
+
+        // Copy to clipboard
+        function copyToClipboard(format) {
+            if (materials.length === 0) {
+                alert('No materials to copy');
+                return;
+            }
+
+            let text = '';
+            switch(format) {
+                case 'json':
+                    text = JSON.stringify({
+                        materials: materials,
+                        timestamp: new Date().toISOString()
+                    }, null, 2);
+                    break;
+                case 'csv':
+                    text = generateCSVExport();
+                    break;
+            }
+
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification(`Copied ${format.toUpperCase()} to clipboard`);
+            }).catch(err => {
+                console.error('Copy failed:', err);
+                alert('Failed to copy to clipboard');
+            });
+        }
+
+        // Print function
+        function printMaterials() {
+            window.print();
+        }
+
+        // Notification system
+        function showNotification(message, type = 'success') {
+            if (!settings.notifications) return;
+            
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                background: var(--${type === 'success' ? 'success' : 'secondary'}-color);
+                color: white;
+                border-radius: 5px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 3000;
+                animation: slideIn 0.3s ease-out;
+                max-width: 300px;
+            `;
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
         }
 
         // Tab switch function
@@ -1770,19 +2048,19 @@
             document.getElementById(`${tabName}-tab`).classList.add('active');
         }
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            // Load GitHub config
-            loadGitHubConfig();
-            
-            // Check URL parameters
-            checkUrlParams();
-            
-            // Example materials for demo
-            if (materials.length === 0 && !shareId) {
-                document.getElementById('empty-state').style.display = 'block';
+        // Add CSS for notifications
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
             }
-        });
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>
